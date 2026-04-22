@@ -2,16 +2,26 @@ services:
   traefik:
     image: traefik:v3.6
     command:
-      - "--api.insecure=true"
+      - "--api.dashboard=true"
       - "--providers.docker=true"
-      - "--entrypoints.web.address=:80"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=proxy"
+      - "--entryPoints.web.address=:80"
       - "--entryPoints.websecure.address=:443"
+      - "--entryPoints.websecure.http.tls=true"
+      - "--entryPoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entryPoints.web.http.redirections.entryPoint.scheme=https"
+      # Let's Encrypt configuration
+      - "--certificatesresolvers.le.acme.email=charles@prpbooks.com" # replace with your actual email
+      - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
     ports:
       - "80:80"
       - "443:443"
       - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - letsencrypt_data:/letsencrypt
   hono:
     build:
       context: .
@@ -22,3 +32,11 @@ services:
       - "traefik.http.routers.hono.rule=Host(`shop-api.prpbooks.com`)"
       - "traefik.http.services.hono.loadbalancer.server.port=3000"
       - "traefik.http.routers.hono.entrypoints=websecure"
+      - "traefik.http.routers.hono.tls.certresolver=le"
+      - "traefik.http.services.hono.loadbalancer.sticky.cookie=true"
+      - "traefik.http.services.hono.loadbalancer.sticky.cookie.name=sticky_cookie"
+      - "traefik.http.services.hono.loadbalancer.sticky.cookie.secure=true"
+      - "traefik.http.services.hono.loadbalancer.sticky.cookie.httpOnly=true"
+
+volumes:
+  letsencrypt_data:
