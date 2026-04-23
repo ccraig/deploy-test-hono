@@ -2,7 +2,7 @@ services:
   traefik:
     image: traefik:v3.6
     command:
-      - "--api.insecure=false"
+      - "--api.insecure=true"
       - "--api.dashboard=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
