@@ -29,6 +29,7 @@ services:
     restart: always
     command: ["node", "/app/dist/index.js"]
     labels:
+      - "traefik.enable=true"
       - "traefik.http.routers.hono.rule=Host(`shop-api.prpbooks.com`)"
       - "traefik.http.services.hono.loadbalancer.server.port=3000"
       - "traefik.http.routers.hono.entrypoints=websecure"
