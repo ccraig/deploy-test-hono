@@ -4,7 +4,7 @@ import { Hono } from 'hono'
 const app = new Hono()
 
 app.get('/', (c) => {
-  return c.text('Hello Honoz!!')
+  return c.text(`Hello Honoz!! ${new Date().toISOString()}`)
 })
 
 serve({
